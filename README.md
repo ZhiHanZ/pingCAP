@@ -63,7 +63,7 @@ will not happen and isolation can be guaranteed.
 #### LSM tree based storage structure
 
 The major performance cost of LSM-trees is the compaction process. During compactions, multiple files are read into memory, sorted, and written back. Sorting is essential for efficient retrieval, for both key lookups and range iterations. With sorting, the key lookups would only require accessing at most one file per level (excluding level zero, where we'd need to check all the files). Iterations would result in sequential access to multiple files.
-#### snaller write and read amplification
+#### smaller write and read amplification
 One drawback of LSM tree is write and read amplification which means value may written multiple times when arranging them in a tree
 and a single read may need to read multiple levels in LSM tree before finding the value
 badger adopted wiscKey technology to reduce write and read amplification by seprating key and value
