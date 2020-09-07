@@ -48,7 +48,6 @@ func (mapper MapReduce) getMinLine(db *badger.DB, id int) (str string, lineNum u
 	if err != nil {
 		log.Fatal(err)
 	}
-	println(str)
 	return str, lineNum, ok
 }
 
