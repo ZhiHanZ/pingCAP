@@ -8,11 +8,12 @@ import (
 
 //for each partition retrieve the one non-repeative word with lowest line number
 //reduce ans to one with smallest line number
-func (mapper MapReduce) getMinLine(db *badger.DB) (str string, lineNum uint64, ok bool) {
+func (mapper MapReduce) getMinLine(db *badger.DB, id int) (str string, lineNum uint64, ok bool) {
 	err := db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
 		it := txn.NewIterator(opts)
+		it.ThreadId = id
 		defer it.Close()
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
@@ -47,6 +48,7 @@ func (mapper MapReduce) getMinLine(db *badger.DB) (str string, lineNum uint64, o
 	if err != nil {
 		log.Fatal(err)
 	}
+	println(str)
 	return str, lineNum, ok
 }
 
@@ -55,9 +57,9 @@ func (mapper MapReduce) Reduce() (str string, ok bool) {
 	var wg sync.WaitGroup
 	wg.Add(mapper.partitionNum)
 	var lineNum uint64
-	for _, db := range mapper.partitions {
-		func() {
-			currStr, currLine, currOk := mapper.getMinLine(db)
+	for i, db := range mapper.partitions {
+		go func(db *badger.DB, i int) {
+			currStr, currLine, currOk := mapper.getMinLine(db, i)
 			if !currOk {
 				wg.Done()
 				return
@@ -74,7 +76,7 @@ func (mapper MapReduce) Reduce() (str string, ok bool) {
 				str = currStr
 			}
 			wg.Done()
-		}()
+		}(db, i)
 	}
 	wg.Wait()
 	return str, ok

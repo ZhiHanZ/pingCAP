@@ -46,7 +46,6 @@ func serialReducer(mapped map[string]pair) (str string, ok bool) {
 	}
 	return str, ok
 }
-
 //Validation is for checking results for small sized file
 func Validation(fileName string) (str string, ok bool) {
 	return serialReducer(serialMapping(fileName))
